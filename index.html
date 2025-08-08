@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBox - Real-Time Chat Platform</title>
+    <meta name="description" content="ChatBox by DriizzyyB - A modern, real-time chat platform built with Node.js and Socket.io">
+    <meta name="keywords" content="chat, real-time, socket.io, nodejs, messaging, communication">
+    <meta name="author" content="DriizzyyB">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourusername.github.io/chatbox/">
+    <meta property="og:title" content="ChatBox - Real-Time Chat Platform">
+    <meta property="og:description" content="A modern, real-time chat platform by DriizzyyB">
+    <meta property="og:image" content="https://yourusername.github.io/chatbox/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yourusername.github.io/chatbox/">
+    <meta property="twitter:title" content="ChatBox - Real-Time Chat Platform">
+    <meta property="twitter:description" content="A modern, real-time chat platform by DriizzyyB">
+    <meta property="twitter:image" content="https://yourusername.github.io/chatbox/preview.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>ChatBox</h2>
+            <p>Connecting to servers...</p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="app-container" id="appContainer">
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-comments"></i>
+                    <span class="brand-name">ChatBox</span>
+                    <span class="brand-version">v1.0</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="connection-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="connection-status" id="connectionStatus">Connecting...</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="creator-info">
+                    <span class="created-by">by</span>
+                    <a href="https://github.com/driizzyy/" target="_blank" class="creator-link">
+                        <i class="fab fa-github"></i>
+                        DriizzyyB
+                    </a>
+                </div>
+                <button class="settings-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <!-- Welcome/Username Section -->
+            <div class="welcome-section" id="usernameSection">
+                <div class="welcome-content">
+                    <div class="welcome-header">
+                        <i class="fas fa-users welcome-icon"></i>
+                        <h1>Welcome to ChatBox</h1>
+                        <p class="welcome-subtitle">Connect with people around the world in real-time</p>
+                    </div>
+                    
+                    <div class="join-form">
+                        <div class="input-group">
+                            <label for="usernameInput" class="input-label">
+                                <i class="fas fa-user"></i>
+                                Choose your username
+                            </label>
+                            <input type="text" id="usernameInput" class="username-input" 
+                                   placeholder="Enter your display name" maxlength="20" 
+                                   autocomplete="off" spellcheck="false">
+                            <div class="input-requirements">
+                                <small>• 1-20 characters • No special symbols • Unique name required</small>
+                            </div>
+                        </div>
+                        
+                        <button id="joinBtn" class="join-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Join Chat Room</span>
+                        </button>
+                    </div>
+
+                    <div class="features-preview">
+                        <div class="feature-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>Real-time messaging</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users"></i>
+                            <span>Live user presence</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Mobile responsive</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure & private</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Chat Interface -->
+            <div class="chat-interface" id="chatSection" style="display: none;">
+                <!-- Room Selection Bar -->
+                <div class="room-bar">
+                    <div class="room-tabs" id="roomTabs">
+                        <button class="room-tab active" data-room="gaming">
+                            <i class="fas fa-gamepad"></i>
+                            Gaming
+                        </button>
+                        <button class="room-tab" data-room="coding">
+                            <i class="fas fa-code"></i>
+                            Coding
+                        </button>
+                        <button class="room-tab" data-room="chilling">
+                            <i class="fas fa-coffee"></i>
+                            Chilling
+                        </button>
+                        <button class="room-tab" data-room="general">
+                            <i class="fas fa-comments"></i>
+                            General
+                        </button>
+                    </div>
+                    <div class="room-actions">
+                        <button class="room-action-btn" id="createRoomBtn" title="Create Private Room">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="room-action-btn" id="joinPrivateBtn" title="Join Private Room">
+                            <i class="fas fa-door-open"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-info">
+                        <h2 class="room-title" id="currentRoomTitle">
+                            <i class="fas fa-gamepad"></i>
+                            Gaming
+                        </h2>
+                        <p class="room-description" id="currentRoomDescription">Gaming discussions and LFG • Let's play together!</p>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn" id="toggleSounds" title="Toggle sound notifications">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="action-btn" id="toggleUsers" title="Toggle users panel">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <button class="action-btn leave-btn" id="leaveBtn" title="Leave chat">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-body">
+                    <!-- Messages Area -->
+                    <div class="messages-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Welcome message will be inserted here -->
+                        </div>
+                        
+                        <!-- Typing Indicators -->
+                        <div class="typing-indicators" id="typingIndicators" style="display: none;">
+                            <div class="typing-indicator">
+                                <span class="typing-user">Someone</span> is typing
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Sidebar -->
+                    <div class="users-sidebar" id="usersSidebar">
+                        <div class="users-header">
+                            <h3>
+                                <i class="fas fa-users"></i>
+                                <span id="currentRoomName">Gaming</span>
+                                <span class="user-count" id="userCount">0</span>
+                            </h3>
+                        </div>
+                        <div class="users-list" id="usersList">
+                            <!-- Users will be populated here -->
+                        </div>
+                        <div class="sidebar-section">
+                            <div class="section-header">
+                                <h4>Private Rooms</h4>
+                                <button class="room-action-btn small" id="refreshRoomsBtn" title="Refresh Rooms">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div class="private-rooms-list" id="privateRoomsList">
+                                <div class="empty-state">
+                                    <i class="fas fa-door-closed"></i>
+                                    <span>No private rooms</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="users-footer">
+                            <small class="users-note">
+                                <i class="fas fa-info-circle"></i>
+                                Switch rooms to chat with different groups
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-container">
+                    <div class="input-wrapper">
+                        <button class="emoji-btn" id="emojiBtn" title="Add emoji">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                        <input type="text" id="messageInput" class="message-input" 
+                               placeholder="Type your message..." maxlength="500"
+                               autocomplete="off" spellcheck="true">
+                        <div class="input-actions">
+                            <span class="char-counter" id="charCounter">0/500</span>
+                            <button id="sendBtn" class="send-btn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-footer">
+                        <small class="input-tips">
+                            <i class="fas fa-lightbulb"></i>
+                            Press Enter to send • Shift+Enter for new line
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="close-btn" id="closeSettings">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <i class="fas fa-volume-up"></i>
+                        Sound Notifications
+                    </label>
+                    <label class="toggle">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <i class="fas fa-moon"></i>
+                        Dark Mode
+                    </label>
+                    <label class="toggle">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <i class="fas fa-bell"></i>
+                        Desktop Notifications
+                    </label>
+                    <label class="toggle">
+                        <input type="checkbox" id="desktopNotifications">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p class="app-info">
+                    <strong>ChatBox v2.0</strong> • Built with ❤️ by 
+                    <a href="https://github.com/driizzyy/" target="_blank">DriizzyyB</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Private Room Modal -->
+    <div class="modal-overlay" id="createRoomModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus"></i> Create Private Room</h3>
+                <button class="close-btn" id="closeCreateRoom">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="roomNameInput" class="input-label">
+                        <i class="fas fa-door-open"></i>
+                        Room Name
+                    </label>
+                    <input type="text" id="roomNameInput" class="modal-input" 
+                           placeholder="Enter room name" maxlength="30">
+                </div>
+                <div class="input-group">
+                    <label for="roomPasswordInput" class="input-label">
+                        <i class="fas fa-lock"></i>
+                        Password (Optional)
+                    </label>
+                    <input type="password" id="roomPasswordInput" class="modal-input" 
+                           placeholder="Leave empty for no password" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <label for="maxUsersInput" class="input-label">
+                        <i class="fas fa-users"></i>
+                        Max Users
+                    </label>
+                    <select id="maxUsersInput" class="modal-select">
+                        <option value="2">2 users</option>
+                        <option value="5" selected>5 users</option>
+                        <option value="10">10 users</option>
+                        <option value="20">20 users</option>
+                        <option value="50">50 users</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelCreateRoom">Cancel</button>
+                <button class="btn-primary" id="confirmCreateRoom">
+                    <i class="fas fa-plus"></i>
+                    Create Room
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Private Room Modal -->
+    <div class="modal-overlay" id="joinRoomModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-door-open"></i> Join Private Room</h3>
+                <button class="close-btn" id="closeJoinRoom">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="joinRoomCodeInput" class="input-label">
+                        <i class="fas fa-key"></i>
+                        Room Code
+                    </label>
+                    <input type="text" id="joinRoomCodeInput" class="modal-input" 
+                           placeholder="Enter room code" maxlength="10" style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label for="joinRoomPasswordInput" class="input-label">
+                        <i class="fas fa-lock"></i>
+                        Password (if required)
+                    </label>
+                    <input type="password" id="joinRoomPasswordInput" class="modal-input" 
+                           placeholder="Enter password if room is protected">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelJoinRoom">Cancel</button>
+                <button class="btn-primary" id="confirmJoinRoom">
+                    <i class="fas fa-door-open"></i>
+                    Join Room
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Context Menu -->
+    <div class="context-menu" id="userContextMenu" style="display: none;">
+        <div class="context-menu-item" id="kickUser">
+            <i class="fas fa-user-times"></i>
+            Kick User
+        </div>
+        <div class="context-menu-item" id="banUser">
+            <i class="fas fa-ban"></i>
+            Ban User
+        </div>
+        <div class="context-menu-item" id="makeAdmin">
+            <i class="fas fa-crown"></i>
+            Make Admin
+        </div>
+    </div>
+
+    <!-- Room Info Modal (Admin Panel) -->
+    <div class="modal-overlay" id="roomInfoModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Room Administration</h3>
+                <button class="close-btn" id="closeRoomInfo">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-section">
+                    <h4>Room Information</h4>
+                    <div class="room-info-display">
+                        <div class="info-item">
+                            <span class="info-label">Room Code:</span>
+                            <span class="info-value" id="adminRoomCode">------</span>
+                            <button class="copy-btn" id="copyRoomCode" title="Copy room code">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Users:</span>
+                            <span class="info-value" id="adminUserCount">0/0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Created:</span>
+                            <span class="info-value" id="adminCreatedTime">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h4>Banned Users</h4>
+                    <div class="banned-users-list" id="bannedUsersList">
+                        <div class="empty-state">
+                            <span>No banned users</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h4>Danger Zone</h4>
+                    <button class="btn-danger" id="deleteRoom">
+                        <i class="fas fa-trash"></i>
+                        Delete Room
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <p>&copy; 2025 ChatBox by DriizzyyB. Made with passion.</p>
+            </div>
+            <div class="footer-right">
+                <a href="https://github.com/driizzyy/" target="_blank" class="footer-link">
+                    <i class="fab fa-github"></i>
+                    View Source
+                </a>
+                <span class="footer-separator">•</span>
+                <a href="#" class="footer-link" id="aboutLink">
+                    About
+                </a>
+            </div>
+        </div>
+    </footer>
+    <!-- Socket.io client library -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
